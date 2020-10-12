@@ -1,0 +1,13 @@
+__pycache__/
+Operation/
+sqlite/
+olddocument/
+venv/
+configs/
+.DS_Store
+config*.py
+*.json
+*.log
+*.ipynb
+*.txt
+*.db
