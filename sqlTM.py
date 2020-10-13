@@ -4,9 +4,9 @@ import json
 import twitter
 import logging
 
-from bckclass import DBC, dbj, pCur
-from bckclass import dbUser, dbTweet, dbUSjson, dbTWjson
-from bckclass import PSQLTweet, PSQLUser, followerlist, friendlist
+from bckclss import DBC, dbj, pCur
+from bckclss import dbUser, dbTweet, dbUSjson, dbTWjson
+from bckclss import PSQLTweet, PSQLUser, followerlist, friendlist
 
 from order import wizard
 from apiclss import selectapi
@@ -61,7 +61,7 @@ class clsuser(object):
 		if self.index:
 			return self.index
 		else:
-			if isinstance(self.uinte, int) or skip:
+			if isinstance(self.uinte, int):
 				self._get_user_info()
 				return self.index
 			else:
@@ -161,7 +161,6 @@ class clsuser(object):
 		result = (0, 0, 0)
 		if ext:
 			result = _sqlite_commit_query(self.index, self.uinte, self.uname, inputjson)
-		
 
 		return result
 
@@ -231,8 +230,8 @@ class clsuser(object):
 			else:
 				return (0, 0, 0)
 		else:
-			# jjt = self._intermediator(jjt)
-			pass
+			print(jjt)
+			jjt = self._intermediator(jjt)
 
 		return self._recive_json( config["ext"], jjt)
 
@@ -626,7 +625,7 @@ class uevent:
 				point = date.fromisoformat(qry['since'])
 
 				self.searchkeyword(qindex, qry)
-			except ValueError:
+			except TypeError:
 				logging.debug("date queries need maintenance")
 				return
 
@@ -797,7 +796,7 @@ class uevent:
 
 			tweets =[]
 
-			# print("{}{}{}{}{}&include_entities=True".format(subcon, minid, maxid, esince, euntil))
+			print("{}{}{}{}{}".format(subcon, minid, maxid, until, since))
 
 			tweets = selectapi(["st"]).GetSearch(raw_query= "{}{}{}{}{}".format(subcon, minid, maxid, until, since)) 
 
@@ -810,7 +809,7 @@ class uevent:
 				for result in tweets:
 
 					user = clsuser(result.user.id)  ##
-					user._get_user_info(result._json["user"])
+					# user._get_user_info(result._json["user"])
 					tweet = clstweet(result.id, result.user.id)   ##
 					tweet._get_tweet_info(result._json)
 
