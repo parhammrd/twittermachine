@@ -28,9 +28,9 @@ class clsuser(object):
 		self.uinte = userid
 		self.uname = username
 		self._set_element()
-		if self.revindex():
+		#if self.revindex():
 			# pass
-			self._get_user_info()
+		#	self._get_user_info()
 			# self._get_followers()
 			# self._get_friends()
 
@@ -230,7 +230,7 @@ class clsuser(object):
 			else:
 				return (0, 0, 0)
 		else:
-			print(jjt)
+			#print(jjt)
 			jjt = self._intermediator(jjt)
 
 		return self._recive_json( config["ext"], jjt)
@@ -390,7 +390,8 @@ class clstweet(object):
 		self.postid = postid
 		self.userid = userid
 		self._set_element()
-		# self._get_tweet_info()
+		#if self.revindex():
+		#	self._get_tweet_info()
 
 	def _set_element(self):
 		session = DBC()
@@ -797,9 +798,10 @@ class uevent:
 			tweets =[]
 
 			print("{}{}{}{}{}".format(subcon, minid, maxid, until, since))
-
-			tweets = selectapi(["st"]).GetSearch(raw_query= "{}{}{}{}{}".format(subcon, minid, maxid, until, since)) 
-
+			try:
+				tweets = selectapi(["st"]).GetSearch(raw_query= "{}{}{}{}{}".format(subcon, minid, maxid, until, since)) 
+			except:
+				continue
 			#result_type='mixed' ,term=None, geocode=None, locale=None, return_json=False #until=euntil, since=esince,
 			# since_id=1170115915964268545,      #, until=euntil, since=esince, count=15, include_entities=True
 			
@@ -809,7 +811,7 @@ class uevent:
 				for result in tweets:
 
 					user = clsuser(result.user.id)  ##
-					# user._get_user_info(result._json["user"])
+					user._get_user_info(result._json["user"])
 					tweet = clstweet(result.id, result.user.id)   ##
 					tweet._get_tweet_info(result._json)
 
