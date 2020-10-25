@@ -11,27 +11,27 @@ import sys
 import importlib
 
 try:
-   os.mkdir("configs")
+    os.mkdir("configs")
 except FileExistsError:
-   pass
+    pass
 
 sys.path.append('./configs/')
 
 config = []
 for file in os.listdir("./configs/"):
     if file.startswith("config") and file.endswith(".py"):
-        config.append(importlib.import_module(file[:-3])) # use secure class objects
+        config.append(importlib.import_module(file[:-3]))  # use secure class objects
 
 
-def printProgressBar(iteration, total, prefix = '', suffix = '', decimals = 1, length = 50, fill = '█'):
-
+def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r %s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
+    print('\r %s |%s| %s%% %s' % (prefix, bar, percent, suffix), end='\r')
     # Print New Line on Complete
-    if iteration == total: 
+    if iteration == total:
         print("{} is finished\n".format(prefix))
+
 
 class apisugg(object):
     tag = 0
@@ -43,16 +43,17 @@ class apisugg(object):
         apisugg.tag += 1
 
         # self.updatelimitrate(self.api)
-    
+
     def __str__(self):
-        return "{} {} {} // {} {} {} // {}\n".format(self.cous, self.cofw, self.cofr, self.coss, self.cosr, self.cosw, self.costt)
+        return "{} {} {} // {} {} {} // {}\n".format(self.cous, self.cofw, self.cofr, self.coss, self.cosr, self.cosw,
+                                                     self.costt)
 
     def updatelimitrate(self, api):
 
         if (self.init - time.time()) < 0:
             try:
                 api.InitializeRateLimit()
-            except:# twitter.error.TwitterError:
+            except:  # twitter.error.TwitterError:
                 return False
             # print("api {}: Initialized\n".format(self.rid))
 
@@ -78,10 +79,10 @@ class apisugg(object):
             self.costt = self.searchtweet.remaining
 
             print(self.__str__())
-        
+
         return True
 
-    def getapi(self, method, initvalue = False):
+    def getapi(self, method, initvalue=False):
 
         check = self.updatelimitrate(self.api)
         if not check:
@@ -152,7 +153,7 @@ class apisugg(object):
                 check = False
                 self.init = self.searchtweet.reset
                 print("api %s: search tweet is down" % str(self.rid))
-                
+
         if check:
             return self.api
         else:
@@ -172,9 +173,9 @@ class apisugg(object):
                 elif "sr" in method:
                     self.init = self.statusretweeters.reset
                 elif "sw" in method:
-                    self.init = self.statusretweets.reset    
+                    self.init = self.statusretweets.reset
                 elif "st" in method:
-                    self.init = self.searchtweet.reset   
+                    self.init = self.searchtweet.reset
                 if check:
                     return self.init
                 else:
@@ -182,23 +183,26 @@ class apisugg(object):
             else:
                 return None
 
+
 apilist = []
 for conf in config:
     try:
-        apilist.append(apisugg(twitter.Api(consumer_key = getattr(conf, "consumer_key"),
-                            consumer_secret = getattr(conf, "consumer_secret"),
-                            access_token_key = getattr(conf, "token"),
-                            access_token_secret = getattr(conf, "token_secret"))))
+        apilist.append(apisugg(twitter.Api(consumer_key=getattr(conf, "consumer_key"),
+                                           consumer_secret=getattr(conf, "consumer_secret"),
+                                           access_token_key=getattr(conf, "token"),
+                                           access_token_secret=getattr(conf, "token_secret"))))
     except EOFError:
         print("config gets out, because an Error")
         continue
-    
+
 print("{} configs import\n".format(len(apilist)))
 
 del config
 
 ride = 0
-def selectapi(method = ""):
+
+
+def selectapi(method=""):
     global ride
 
     apit = apilist[ride % len(apilist)].getapi(method)
@@ -207,24 +211,23 @@ def selectapi(method = ""):
         # sys.setrecursionlimit((len(apilist)*3))
         try:
             ride += 1
-            #; time.sleep(60)
+            # ; time.sleep(60)
             return selectapi(method)
-        except:# twitter.error.TwitterError and RecursionError : # ride < (len(apilist) * 3)
+        except:  # twitter.error.TwitterError and RecursionError : # ride < (len(apilist) * 3)
             ride = 0
             print("api sleeptimes initialized")
-            timesc = [ (i.getapi(method, True) - time.time()) for i in apilist ] #TypeError
+            timesc = [(i.getapi(method, True) - time.time()) for i in apilist]  # TypeError
             print("\t {}".format(timesc))
 
             sleep_time = max(timesc)
             print("\n\t program is going to sleep for {} s".format(sleep_time))
-            printProgressBar(0, 1, prefix = 'sleeptime:', suffix = 'Load', length = 50)
+            printProgressBar(0, 1, prefix='sleeptime:', suffix='Load', length=50)
 
             for i in range(100):
-                printProgressBar(i + 1, 100, prefix = 'sleeptime:', suffix = 'Load', length = 50)
-                time.sleep(abs(sleep_time)/100)
-            
+                printProgressBar(i + 1, 100, prefix='sleeptime:', suffix='Load', length=50)
+                time.sleep(abs(sleep_time) / 100)
+
             # sys.setrecursionlimit(1000)
             return selectapi(method)
-    else:    
+    else:
         return apit
-            

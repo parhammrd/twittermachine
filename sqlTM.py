@@ -4,6 +4,8 @@ import json
 import twitter
 import logging
 
+from sqlalchemy import and_
+
 from bckclss import DBC, dbj, pCur
 from bckclss import dbUser, dbTweet, dbUSjson, dbTWjson
 from bckclss import PSQLTweet, PSQLUser, followerlist, friendlist
@@ -166,7 +168,7 @@ class clsuser(object):
 
 	def _get_user_info(self, jjt = None):
 		def _call_api_GUI( input):
-			try: 
+			try:
 				if isinstance( input, int):
 					usjsonfile = selectapi(["us"]).GetUser(user_id = input)
 				else:
@@ -240,7 +242,7 @@ class clsuser(object):
 
 		pass
 		# if self.active and not self.protected:
-		# 	, ncursor = 
+		# 	, ncursor =
 
 		# while ncursor:
 
@@ -281,12 +283,12 @@ class clsuser(object):
 				else:
 					n = gauser.fwpages[-1].revpage() # or -1
 					session.close()
-					return number, n  
+					return number, n
 
 		if self.active and (not self.protected):
-	
+
 			nfwpages, ncursor = _get_access(self.uinte)
-		
+
 			if ((int(self.followers_count) % 5000) + 1) == nfwpages and (ncursor is None):
 
 				# print('dont need update now \n')
@@ -299,7 +301,7 @@ class clsuser(object):
 				fwjson = selectapi(["fw"]).GetFollowerIDsPaged(user_id=self.uinte, cursor=ncursor, count=5000)
 			except twitter.error.TwitterError:
 				try:
-					if selectapi(["us"]).GetUser(self.uinte).protected :    
+					if selectapi(["us"]).GetUser(self.uinte).protected :
 						# print("\t\t$ user protected {} \n\t\t\t ~follower list failed".format(self.uinte))
 						break
 					else:
@@ -350,12 +352,12 @@ class clsuser(object):
 					n = gauser.frpages[-1].revpage() # or -1
 					print(n)
 					session.close()
-					return number, n  
+					return number, n
 
 		if self.active and not self.protected:
-	
+
 			nfrpages, ncursor = _get_access(self.uinte)
-		
+
 			if ((int(self.friends_count) % 5000) + 1) == nfrpages and (ncursor is None):
 
 				print('dont need update now \n')
@@ -369,7 +371,7 @@ class clsuser(object):
 				frjson = selectapi(["fr"]).GetFriendIDsPaged(user_id=self.uinte, cursor=ncursor, count=5000)
 			except twitter.error.TwitterError:
 				try:
-					if selectapi(["us"]).GetUser(self.uinte).protected :    
+					if selectapi(["us"]).GetUser(self.uinte).protected :
 						# print("\t\t$ user protected {} \n\t\t\t ~ friend list failed".format(self.uinte))
 						break
 					else:
@@ -426,7 +428,7 @@ class clstweet(object):
 		session = pCur()
 		pqutweet = session.query(PSQLTweet).\
 			filter(PSQLTweet.postid == self.postid).one_or_none()
-		
+
 		session.close()
 
 		if pqutweet is None:
@@ -513,12 +515,12 @@ class clstweet(object):
 		result = (0, 0, 0)
 		if ext:
 			result = _sqlite_commit_query(self.index, self.postid, self.userid, inputjson)
-		
+
 		return result
-		
+
 	def _get_tweet_info(self, jjt = None):
 		def _call_api_GTI( input):
-			try: 
+			try:
 				twjsonfile = selectapi(["ss"]).GetStatus(input)
 				logging.debug("{} ==> Get tweet Info".format(input))
 				return twjsonfile._json
@@ -542,7 +544,7 @@ class clstweet(object):
 					# order_by(dbTWjson.index.desc()).first()
 
 				# print(dbjson)
-				
+
 				js = dbjson._rev_json()
 
 			except NoResultFound:
@@ -555,7 +557,7 @@ class clstweet(object):
 
 		config = self.conjson
 		self.askpg()
-		
+
 		try:
 			detla = datetime.now() - self.lastupdate
 			delta = detla.seconds < config["fram"]*60
@@ -585,7 +587,7 @@ class uevent:
 			qry = self.conjson["query"][qindex]
 			query = qry["qname"]
 			if qry['expire']:
-				return 
+				return
 		except ValueError:
 			logging.debug("json query has problem {}".format(self.conjson['dbname']))
 			return
@@ -608,7 +610,7 @@ class uevent:
 			# if limitapi.days > 7 :
 			# 	qry['expire'] = True
 			# 	self.commitchanges(qry)
-			# 	return 
+			# 	return
 			qry['qname'] = ' '
 			qry['until'] = query
 			qry['since'] = point.replace(day = (point.day-1)).isoformat()
@@ -646,9 +648,9 @@ class uevent:
 		# 	'dbname': self.conjson["dbname"],
 		# 	'runner': ""}
 		# def desk( **config):
-		# 	screen = "## \t \t \t \t \t ##\n" + "## \t \t \t {} \t ##\n".format(config['date']) + "   \t {}/{}/{} \t \t \t   \n".format(config['udeac'], config['uchec'], config['utotl']) 
+		# 	screen = "## \t \t \t \t \t ##\n" + "## \t \t \t {} \t ##\n".format(config['date']) + "   \t {}/{}/{} \t \t \t   \n".format(config['udeac'], config['uchec'], config['utotl'])
 		# 		+ "   \t {}/{}/{} \t {} \t   \n".format(config['tdeac'], config['tchec'], config['ttotl'], config['dbname']) + "## \t \t \t \t \t ##\n" + "## >/ {} ".format(config['runner'])
-			
+
 		# 	return print(screen, end = '\r')
 
 		# doc['udeac'] += user[0]
@@ -725,13 +727,13 @@ class uevent:
 			#     uvb += 1
 		session.close()
 		csv_file.close()
-		# print("total users: {} \t need GetUserInfo users: {} include botometer scores: {} \n \t\t total edges store: \n".format(len(users), uvu, uvb))    
+		# print("total users: {} \t need GetUserInfo users: {} include botometer scores: {} \n \t\t total edges store: \n".format(len(users), uvu, uvb))
 		# input("press enter to continue ... ")
 
-		# print("total tweets: {} \t total urls: {} & hashtags: {} & mention links: {} \n".format( len(tweets), len(urls), len(hashs), len(mentions))) 
+		# print("total tweets: {} \t total urls: {} & hashtags: {} & mention links: {} \n".format( len(tweets), len(urls), len(hashs), len(mentions)))
 		# for tweet in reversed(tweets):
 		#     jj = json.loads(tweet.twjson)
-		#     print("{}: {} : {} \n\t retweeted : {} favorited : {} \n\t hash : {}\n\t {} \n".format(tweet.index, jj['id'], jj['created_at'], jj['retweet_count'], jj['favorite_count'], len(jj['entities']['hashtags']),jj['full_text']))   
+		#     print("{}: {} : {} \n\t retweeted : {} favorited : {} \n\t hash : {}\n\t {} \n".format(tweet.index, jj['id'], jj['created_at'], jj['retweet_count'], jj['favorite_count'], len(jj['entities']['hashtags']),jj['full_text']))
 		#     break
 		input("press enter to continue ... ")
 
@@ -764,7 +766,7 @@ class uevent:
 
 		maxid = ""
 		minid = ""
-		
+
 		#q=%20%20lang%3Afa%20until%3A2020-04-01%20since%3A2020-03-31&src=typed_query
 		# idpoint = 1170673654583066624
 
@@ -775,7 +777,7 @@ class uevent:
 			if not idsince or not until == "":
 				maxid = ""
 				minid = ""
-	
+
 			elif not idpoint:
 				maxid = ""
 				minid = "%20since_id%3A{}".format(idsince)
@@ -799,12 +801,12 @@ class uevent:
 
 			print("{}{}{}{}{}".format(subcon, minid, maxid, until, since))
 			try:
-				tweets = selectapi(["st"]).GetSearch(raw_query= "{}{}{}{}{}".format(subcon, minid, maxid, until, since)) 
+				tweets = selectapi(["st"]).GetSearch(raw_query= "{}{}{}{}{}".format(subcon, minid, maxid, until, since))
 			except:
 				continue
 			#result_type='mixed' ,term=None, geocode=None, locale=None, return_json=False #until=euntil, since=esince,
 			# since_id=1170115915964268545,      #, until=euntil, since=esince, count=15, include_entities=True
-			
+
 			until = ""
 
 			if len(tweets):
@@ -823,12 +825,12 @@ class uevent:
 						if not idsince:
 							idsince = result.id
 							config['idsince'] = idsince
-						
+
 						self.commitchanges(config)
 					else:
 						idpoint = min(result.id, idpoint)
 						config['idpoint'] = idpoint
-						
+
 						self.commitchanges(config)
 			else:
 
@@ -860,5 +862,5 @@ class uevent:
 	#         session.query(dbUser).filter(dbUser.userid == idd).one()
 	#         dbUser.botometer = json.dumps(us[idd])
 	#         session.commit()
-	
+
 	#       return
