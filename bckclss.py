@@ -322,6 +322,9 @@ class followerlist(Core):
     def revpage(self):
         return self.page
 
+    def get_follower_list(self):
+        return self.flist
+
 
 class friendlist(Core):
     __tablename__ = "friendlist"
@@ -344,6 +347,8 @@ class friendlist(Core):
     def revpage(self):
         return self.page
 
+    def get_friend_list(self):
+        return self.flist
 
 # class temporalEL():
 # 	__tablename__ = "dbtemporalEL"
