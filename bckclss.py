@@ -297,9 +297,11 @@ class PSQLUser(Core):
     def revuptime(self):
         return self.lastupdate
 
-    def getfriends(self):
+    def gfrpages(self):
         return self.frpages
 
+    def gfwpages(self):
+        return self.fwpages
 
 class followerlist(Core):
     __tablename__ = "followerlist"
@@ -322,9 +324,8 @@ class followerlist(Core):
     def revpage(self):
         return self.page
 
-    def get_follower_list(self):
+    def gfwlist(self):
         return self.flist
-
 
 class friendlist(Core):
     __tablename__ = "friendlist"
@@ -347,7 +348,7 @@ class friendlist(Core):
     def revpage(self):
         return self.page
 
-    def get_friend_list(self):
+    def gfrlist(self):
         return self.flist
 
 # class temporalEL():
