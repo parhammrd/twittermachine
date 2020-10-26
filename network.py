@@ -29,20 +29,21 @@ def get_friendship_graph(sqllite_db):
         flwpages = pquser.gfwpages()
         for page in frnpages:
             for frn in page.gfrlist():
-                edge = (user, frn)
+                edge = (user[0], frn)
                 edge_list.append(edge)
         for page in flwpages:
             for flw in page.gfwlist():
-                edge = (flw, user)
+                edge = (flw, user[0])
                 edge_list.append(edge)
-    
-    print(dlist)
+        
+        break 
+    print(edge_list)
     conn.close()
     session_pg.close()
-    graph = nx.DiGraph()
+    #graph = nx.DiGraph()
     g=nx.from_edgelist(edge_list)
-    nx.write_graphml(g, "sqlite/"+sqllite_db+".graphml")
-    return graph
+    nx.write_graphml(g, "sqlite/"+str(sqllite_db)+".graphml")
+    #return graph
 
 get_friendship_graph(sys.argv[1])
 print('graphml saved: ', sys.argv[1])

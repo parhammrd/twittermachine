@@ -363,6 +363,6 @@ class friendlist(Core):
 # 		self.query = query
 # 		self.snapshot = snapshot
 
-engine = create_engine('postgresql://localhost/Psql_dbTwitterMachine')
+engine = create_engine('postgresql://localhost/iran_psql_dbtwittermachine')
 Core.metadata.create_all(bind=engine)
 pCur = sessionmaker(bind=engine)
