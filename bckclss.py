@@ -288,6 +288,12 @@ class PSQLUser(Core):
 	def revuptime(self):
 		return self.lastupdate
 
+	def gfrpages(self):
+        return self.frpages
+
+    def gfwpages(self):
+        return self.fwpages
+
 class followerlist(Core):
 	__tablename__ = "followerlist"
 	index = Column('index', Integer, autoincrement=True, primary_key = True)
@@ -309,6 +315,9 @@ class followerlist(Core):
 	def revpage(self):
 		return self.page
 
+	def gfwlist(self):
+        return self.flist
+
 class friendlist(Core):
 	__tablename__ = "friendlist"
 	index = Column('index', Integer, autoincrement=True, primary_key = True)
@@ -329,6 +338,9 @@ class friendlist(Core):
 
 	def revpage(self):
 		return self.page
+
+	def gfrlist(self):
+        return self.flist
 
 # class temporalEL():
 # 	__tablename__ = "dbtemporalEL"

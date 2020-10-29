@@ -735,6 +735,51 @@ class uevent:
 		#     break
 		input("press enter to continue ... ")
 
+	def exfredges(dbname):
+    	session_db = DBC()
+    	users_list = session_db.query(dbUser.userid).all()
+    	session_db.close()
+
+    	for uid in users_list:
+    		fid = clsuser(uid)
+    		fid.GetUserInfo()
+    		fid._get_followers()
+    		fid._get_friends()
+
+    	session_pg = pCur()
+
+	    edge_list = []
+	    dlist = []
+
+	    # delete csv file for start
+
+	    for user in users_list:
+	        try:
+	            pquser = session_pg.query(PSQLUser). \
+	                filter(PSQLUser.userid == user).one()
+	        except NoResultFound:
+	            dlist.append(user)
+	            continue
+
+	        frnpages = pquser.gfrpages()
+	        flwpages = pquser.gfwpages()
+	        for page in frnpages:
+	            for frn in page.gfrlist():
+	                edge = (user, frn)
+	                edge_list.append(edge)
+	        for page in flwpages:
+	            for flw in page.gfwlist():
+	                edge = (flw, user)
+	                edge_list.append(edge)
+
+		    with open("sqlite/" + str(dbname) + ".csv", 'wb') as out:
+		        csv_out = csv.writer(out, delimiter=";")
+		        for row in edge_list:
+		            csv_out.writerow(row)
+
+		print(dlist)
+	    session_pg.close()
+
 	def searchkeyword(self, qindex, config):
 
 		if config['since'] is None:
