@@ -597,11 +597,10 @@ class uevent:
 
 		if query.endswith(".json"):
 			self.listinput(query)
-		if query.endswith(".user"):
+		elif query.endswith(".user"):
 			clsuser(None, query[:-5])
-		if query.endswith(".export"):
-			query = query[:-7]
-			self.connected(query)
+		elif query.endswith(".export"):
+			exfredges(self.conjson["dbname"]+query[:-7])
 		elif isinstance(point, date):
 			# point.replace(day = point.day-1)
 			# limitapi = abs(point - date.today())
