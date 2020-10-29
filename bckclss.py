@@ -289,10 +289,10 @@ class PSQLUser(Core):
 		return self.lastupdate
 
 	def gfrpages(self):
-        return self.frpages
+		return self.frpages
 
-    def gfwpages(self):
-        return self.fwpages
+	def gfwpages(self):
+		return self.fwpages
 
 class followerlist(Core):
 	__tablename__ = "followerlist"
@@ -316,7 +316,7 @@ class followerlist(Core):
 		return self.page
 
 	def gfwlist(self):
-        return self.flist
+		return self.flist
 
 class friendlist(Core):
 	__tablename__ = "friendlist"
@@ -340,7 +340,7 @@ class friendlist(Core):
 		return self.page
 
 	def gfrlist(self):
-        return self.flist
+		return self.flist
 
 # class temporalEL():
 # 	__tablename__ = "dbtemporalEL"
