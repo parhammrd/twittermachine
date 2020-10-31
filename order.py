@@ -124,16 +124,15 @@ if __name__ == "__main__":
         uevent(0)
 
     elif sys.argv[1] == "--dailyjob":
-        while(True):
-            oper = os.listdir('./Operation/')
+        oper = os.listdir('./Operation/')
 
-            for job in oper:
-                if job.endswith('.json'):
-                    wiz = wizard(job)
-                    print("{} event start".format(job[:-4]))
-                    
-                    uevent = dynamic_import("sqlTM", "uevent")
+        for job in oper:
+            if job.endswith('.json'):
+                wiz = wizard(job)
+                print("{} event start".format(job[:-4]))
+                
+                uevent = dynamic_import("sqlTM", "uevent")
 
-                    for thread in wiz.yieldqueries():
-                        uevent(thread)
+                for thread in wiz.yieldqueries():
+                    uevent(thread)
     
