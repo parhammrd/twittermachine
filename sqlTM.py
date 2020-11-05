@@ -4,8 +4,8 @@ import json
 import twitter
 import logging
 
-from bckclss import DBC, dbj, pCur
-from bckclss import dbUser, dbTweet, dbUSjson, dbTWjson
+from bckclss import DBC, DBE, dbj, pCur
+from bckclss import dbUser, dbTweet, dbUSjson, dbTWjson, dbEdges
 from bckclss import PSQLTweet, PSQLUser, followerlist, friendlist
 
 from order import wizard
@@ -746,6 +746,7 @@ class uevent:
 			fid._get_friends()
 
 		session_pg = pCur()
+		seesion_eg = DBE()
 
 		edge_list = []
 		dlist = []
@@ -764,20 +765,46 @@ class uevent:
 		    flwpages = pquser.gfwpages()
 		    for page in frnpages:
 		        for frn in page.gfrlist():
-		            edge = (user, frn)
+		            edge = [user, frn]
 		            edge_list.append(edge)
 		    for page in flwpages:
 		        for flw in page.gfwlist():
-		            edge = (flw, user)
+		            edge = [flw, user]
 		            edge_list.append(edge)
 
-		    with open("sqlite/" + str(dbname) + ".csv", 'wb') as out:
-		        csv_out = csv.writer(out, delimiter=";")
-		        for row in edge_list:
-		            csv_out.writerow(row)
+		    # with open("sqlite/" + str(dbname) + ".csv", 'wb') as out:
+		    #     csv_out = csv.writer(out, delimiter=";")
+
+	        for row in edge_list:
+	        		point = dbEdges(row[0], row[1])
+					session.add(point)
+					session.commit()
 
 		print(dlist)
 		session_pg.close()
+
+	def getfrnlayersnetwork(layer, user, limit, edge_list):
+	    clsuser._get_followers(user)
+	    clsuser._get_friends(user)
+	    for i in layer:
+	        frnpages = user.gfrpages()
+	        flwpages = user.gfwpages()
+	        for page in frnpages:
+	            for frn in page.gfrlist():
+	                edge = (user[0], frn)
+	                edge_list.append(edge)
+	                newuser = clsuser._get_user_info(frn)
+	                if newuser.followers_count() < limit:
+	                    getfrnlayersnetwork(i, newuser, limit, edge_list)
+	        for page in flwpages:
+	            for flw in page.gfwlist():
+	                edge = (flw, user[0])
+	                edge_list.append(edge)
+	                newuser = clsuser._get_user_info(flw)
+	                if newuser.followers_count() < limit:
+	                    getfrnlayersnetwork(i, newuser, limit, edge_list)
+
+	        return edge_list
 
 	def searchkeyword(self, qindex, config):
 

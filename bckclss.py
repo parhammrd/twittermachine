@@ -168,7 +168,16 @@ engine = create_engine('sqlite:///sqlite/{}.db'.format(name), echo = False)
 Base.metadata.create_all(bind = engine)
 DBC = sessionmaker(bind = engine)
 
-# pool = declarative_base()
+pool = declarative_base()
+
+class dbEdges(pool):
+    __tablename__ = "dbEdges"
+    point = Column('point', BigInteger, nullable = False)
+    dirct = Column('dirct', BigInteger, nullable = False)
+
+    def __init__(self, po, di):
+        self.point = po
+        self.dirct = di
 
 # class dbUrl(pool):
 #     __tablename__ = "dbUrls"
@@ -213,9 +222,9 @@ DBC = sessionmaker(bind = engine)
 #         self.user_mentioned_id = usermd
 #         self.body = json.dumps(json)
 
-# engine = create_engine('sqlite:///sqlite/{}-P1pool.db'.format(name), echo = False)
-# pool.metadata.create_all(bind = engine)
-# DBE = sessionmaker(bind = engine)
+engine = create_engine('sqlite:///sqlite/{}-P1pool.db'.format(name), echo = False)
+pool.metadata.create_all(bind = engine)
+DBE = sessionmaker(bind = engine)
 
 #%% json class objects
 
