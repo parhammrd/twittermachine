@@ -62,6 +62,7 @@ class wizard:
 
         if jsonfile:
             js = self.ldjson(jsonfile)
+            self.mkjson(js)
             if not js['expire']:
                 point = datetime.date.fromisoformat(js['date'])
                 limitqu = abs(point - datetime.date.today())
@@ -70,11 +71,12 @@ class wizard:
                     if js['dbname'] == 'dailymaily':
                         js['query'].append(self._qury)
 
-                self.range = len( js['query'])
-                # self.mkjson(js) 
+                self.range = len( js['query']); print(len( js['query']))
+                self.mkjson(js) 
 
     def yieldqueries(self):
-        return range(self.range)
+        for item in range(self.range):
+            yield item
 
     def revname(self):
         return self.name
@@ -83,7 +85,7 @@ class wizard:
         return self.ndir
 
     def mkjson(self, js):
-        with open(self.ndir, "w") as dbq:
+        with open(self.ndir, "w+") as dbq:
             json.dump(js, dbq)
 
     def ldjson(self, job):
@@ -99,7 +101,7 @@ class wizard:
             with open("./Operation/"+jsn["dbname"]+".json", "w+") as dbtquery:
                 json.dump(jsn, dbtquery)
         else:
-            return self.mkjson(self._jobj)
+            self.mkjson(self._jobj)
 
 if __name__ == "__main__":
 
@@ -135,4 +137,5 @@ if __name__ == "__main__":
 
                 for thread in wiz.yieldqueries():
                     uevent(thread)
-    
+
+                del wiz, uevent

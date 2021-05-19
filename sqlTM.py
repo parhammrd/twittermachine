@@ -4,8 +4,8 @@ import json
 import twitter
 import logging
 
-from bckclss import DBC, DBE, dbj, pCur
-from bckclss import dbUser, dbTweet, dbUSjson, dbTWjson, dbEdges
+from bckclss import DBC, dbj, pCur
+from bckclss import dbUser, dbTweet, dbUSjson, dbTWjson#, dbEdges
 from bckclss import PSQLTweet, PSQLUser, followerlist, friendlist
 
 from order import wizard
@@ -13,6 +13,7 @@ from apiclss import selectapi
 from datetime import datetime
 from datetime import date
 
+from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 
 wiz = wizard()
@@ -28,14 +29,14 @@ class clsuser(object):
 		self.uinte = userid
 		self.uname = username
 		self._set_element()
-		#if self.revindex():
-			# pass
-		#	self._get_user_info()
-			# self._get_followers()
-			# self._get_friends()
+		# if not self.index:
+		#self._get_user_info()
+		# self._get_followers()
+		#self._get_friends()
 
 	def _set_element(self):
 		session = DBC()
+		usdb = False
 		try:
 			if isinstance(self.uinte, int):
 				usdb = session.query(dbUser).\
@@ -45,17 +46,16 @@ class clsuser(object):
 					filter(dbUser.screenname == self.uname).one()
 		except NoResultFound:
 			logging.error("object creation is not valid or didnt present in event cluster")
-			usdb = False
-			session.close()
 
 		if usdb:
 			self.index = usdb.getuserindex()
 			self.active, self.uname, self.uinte , self.protected, self.followers_count, self.friends_count = usdb.revactus()
-			session.close()
 		else:
 			self.index = False
 			self.active = True
 			self.protected, self.followers_count, self.friends_count = False, 0, 0
+
+		session.close()
 
 	def revindex(self):
 		if self.index:
@@ -108,7 +108,7 @@ class clsuser(object):
 			_update_pg((self.lastupdate is not None), self.uinte)
 		else:
 			logging.error("input and user doesn't match")
-			return (0, 0, 0)
+			return False
 
 		lis = {}
 
@@ -236,6 +236,7 @@ class clsuser(object):
 		return self._recive_json( config["ext"], jjt)
 
 	def _get_user_timeline(self):
+
 		# def _gets_tweets(userid):
 
 		pass
@@ -273,6 +274,7 @@ class clsuser(object):
 				filter(followerlist.userid == userid).count()
 
 			if gauser is None:
+				session.close()
 				return 0, None
 			else:
 				if not number:
@@ -281,15 +283,14 @@ class clsuser(object):
 				else:
 					n = gauser.fwpages[-1].revpage() # or -1
 					session.close()
-					return number, n  
+					return number, n
 
 		if self.active and (not self.protected):
 	
 			nfwpages, ncursor = _get_access(self.uinte)
 		
-			if ((int(self.followers_count) % 5000) + 1) == nfwpages and (ncursor is None):
-
-				# print('dont need update now \n')
+			if ((int(self.followers_count) % 5000) + 1) == nfwpages:# and (ncursor is None):
+				print('dont need update now \n')
 				return
 		else:
 			return
@@ -341,6 +342,7 @@ class clsuser(object):
 				filter(friendlist.userid == userid).count()
 
 			if gauser is None:
+				session.close()
 				return 0, None
 			else:
 				if not number:
@@ -356,8 +358,7 @@ class clsuser(object):
 	
 			nfrpages, ncursor = _get_access(self.uinte)
 		
-			if ((int(self.friends_count) % 5000) + 1) == nfrpages and (ncursor is None):
-
+			if ((int(self.friends_count) % 5000) + 1) == nfrpages:# and (ncursor is None):
 				print('dont need update now \n')
 				return
 
@@ -391,7 +392,7 @@ class clstweet(object):
 		self.userid = userid
 		self._set_element()
 		#if self.revindex():
-		#	self._get_tweet_info()
+		#self._get_tweet_info()
 
 	def _set_element(self):
 		session = DBC()
@@ -464,7 +465,7 @@ class clstweet(object):
 			_update_pg((self.lastupdate is not None), self.postid)
 		else:
 			logging.debug("input and tweet doesn't match")
-			return (0, 0, 0)
+			return False #(0, 0, 0)
 
 		lis = {}
 
@@ -581,8 +582,11 @@ class uevent:
 	conjson = jobj
 	def __init__(self, qindex):
 		try:
-			self.qindex = qindex
-			qry = self.conjson["query"][qindex]
+			self.qindex = qindex; print(qindex)
+			try:
+				qry = self.conjson["query"][qindex]
+			except IndexError:
+				return
 			query = qry["qname"]
 			if qry['expire']:
 				return 
@@ -599,8 +603,12 @@ class uevent:
 			self.listinput(query)
 		elif query.endswith(".user"):
 			clsuser(None, query[:-5])
+		elif query.endswith(".ego"):
+			gset = self.getegonetwork(3, int(query[:-4]), 300)
+			with open(query[:-4]+'ego.json', 'w') as fout:
+				json.dump(list(gset), fout)
 		elif query.endswith(".export"):
-			exfredges(self.conjson["dbname"]+query[:-7])
+			self.exfredges(self.conjson["dbname"]+query[:-7])
 		elif isinstance(point, date):
 			# point.replace(day = point.day-1)
 			# limitapi = abs(point - date.today())
@@ -734,77 +742,78 @@ class uevent:
 		#     break
 		input("press enter to continue ... ")
 
-	def exfredges(dbname):
-		session_db = DBC()
-		users_list = session_db.query(dbUser.userid).all()
-		session_db.close()
+	# def exfredges(self, dbname):
+	# 	session_db = DBC()
+	# 	users_list = session_db.query(dbUser.userid).all()
+	# 	session_db.close()
 
-		for uid in users_list:
-			fid = clsuser(uid)
-			fid.GetUserInfo()
-			fid._get_followers()
-			fid._get_friends()
+	# 	for uid in users_list:
+	# 		fid = clsuser(uid)
+	# 		# fid._get_user_info()
+	# 		# fid._get_followers()
+	# 		# fid._get_friends()
 
-		session_pg = pCur()
-		seesion_eg = DBE()
+	# 	session_pg = pCur()
+	# 	seesion_eg = DBE()
 
-		edge_list = []
-		dlist = []
+	# 	edge_list = []
+	# 	dlist = []
 
-		# delete csv file for start
+	# 	# delete csv file for start
 
-		for user in users_list:
-		    try:
-		        pquser = session_pg.query(PSQLUser). \
-		            filter(PSQLUser.userid == user).one()
-		    except NoResultFound:
-		        dlist.append(user)
-		        continue
+	# 	for user in users_list:
+	# 	    try:
+	# 	        pquser = session_pg.query(PSQLUser). \
+	# 	            filter(PSQLUser.userid == user).one()
+	# 	    except NoResultFound:
+	# 	        dlist.append(user)
+	# 	        continue
 
-		    frnpages = pquser.gfrpages()
-		    flwpages = pquser.gfwpages()
-		    for page in frnpages:
-		        for frn in page.gfrlist():
-		            edge = [user, frn]
-		            edge_list.append(edge)
-		    for page in flwpages:
-		        for flw in page.gfwlist():
-		            edge = [flw, user]
-		            edge_list.append(edge)
+	# 	    frnpages = pquser.gfrpages()
+	# 	    flwpages = pquser.gfwpages()
+	# 	    for page in frnpages:
+	# 	        for frn in page.gfrlist():
+	# 	            edge = [user, frn]
+	# 	            edge_list.append(edge)
+	# 	    for page in flwpages:
+	# 	        for flw in page.gfwlist():
+	# 	            edge = [flw, user]
+	# 	            edge_list.append(edge)
 
-		    # with open("sqlite/" + str(dbname) + ".csv", 'wb') as out:
-		    #     csv_out = csv.writer(out, delimiter=";")
+	# 	    # with open("sqlite/" + str(dbname) + ".csv", 'wb') as out:
+	# 	    #     csv_out = csv.writer(out, delimiter=";")
 
-	        for row in edge_list:
-	        		point = dbEdges(row[0], row[1])
-					session.add(point)
-					session.commit()
+	# 		for row in edge_list:
+	# 			point = dbEdges(row[0], row[1])
+	# 			session.add(point)
+	# 			session.commit()
 
-		print(dlist)
-		session_pg.close()
+	# 	session_pg.close()
 
-	def getfrnlayersnetwork(layer, user, limit, edge_list):
-	    clsuser._get_followers(user)
-	    clsuser._get_friends(user)
-	    for i in layer:
-	        frnpages = user.gfrpages()
-	        flwpages = user.gfwpages()
-	        for page in frnpages:
-	            for frn in page.gfrlist():
-	                edge = (user[0], frn)
-	                edge_list.append(edge)
-	                newuser = clsuser._get_user_info(frn)
-	                if newuser.followers_count() < limit:
-	                    getfrnlayersnetwork(i, newuser, limit, edge_list)
-	        for page in flwpages:
-	            for flw in page.gfwlist():
-	                edge = (flw, user[0])
-	                edge_list.append(edge)
-	                newuser = clsuser._get_user_info(flw)
-	                if newuser.followers_count() < limit:
-	                    getfrnlayersnetwork(i, newuser, limit, edge_list)
+	def getegonetwork(self, deep, userid, limit):
+		upoint = clsuser(userid)
 
-	        return edge_list
+		egolist = set()
+		egolist.add(userid)
+		if deep:
+			session_pg = pCur()
+			try:
+				pquser = session_pg.query(PSQLUser). \
+				filter(PSQLUser.userid == userid).one()
+			except NoResultFound:
+				return set()
+
+			frnpages = pquser.gfrpages()
+			for page in frnpages:
+				for frid in page.gfrlist():
+					ufrpoint = clsuser(frid)
+					egolist.add(frid)
+					if ufrpoint.friends_count < limit: #need maintenece
+						egolist.union(self.getegonetwork(deep-1, frid, limit))
+
+			session_pg.close()
+
+		return egolist
 
 	def searchkeyword(self, qindex, config):
 

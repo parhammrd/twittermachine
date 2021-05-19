@@ -168,16 +168,17 @@ engine = create_engine('sqlite:///sqlite/{}.db'.format(name), echo = False)
 Base.metadata.create_all(bind = engine)
 DBC = sessionmaker(bind = engine)
 
-pool = declarative_base()
+#pool = declarative_base()
 
-class dbEdges(pool):
-    __tablename__ = "dbEdges"
-    point = Column('point', BigInteger, nullable = False)
-    dirct = Column('dirct', BigInteger, nullable = False)
+#class dbEdges(pool):
+#    __tablename__ = "dbEdges"
+#    index = Column('index', Integer, autoincrement=True, primary_key = True)
+#    point = Column('point', BigInteger, nullable = False) #source
+#    dirct = Column('dirct', BigInteger, nullable = False) #target
 
-    def __init__(self, po, di):
-        self.point = po
-        self.dirct = di
+#    def __init__(self, po, di):
+#        self.point = po
+#        self.dirct = di
 
 # class dbUrl(pool):
 #     __tablename__ = "dbUrls"
@@ -222,9 +223,9 @@ class dbEdges(pool):
 #         self.user_mentioned_id = usermd
 #         self.body = json.dumps(json)
 
-engine = create_engine('sqlite:///sqlite/{}-P1pool.db'.format(name), echo = False)
-pool.metadata.create_all(bind = engine)
-DBE = sessionmaker(bind = engine)
+#engine = create_engine('sqlite:///sqlite/{}-P1pool.db'.format(name), echo = False)
+#pool.metadata.create_all(bind = engine)
+#DBE = sessionmaker(bind = engine)
 
 #%% json class objects
 
@@ -363,6 +364,6 @@ class friendlist(Core):
 # 		self.query = query
 # 		self.snapshot = snapshot
 
-engine = create_engine('postgresql://localhost/Psql_dbTwitterMachine')
+engine = create_engine('postgresql://localhost/PG_dbTwitterMachine')
 Core.metadata.create_all(bind = engine)
 pCur = sessionmaker(bind = engine)
