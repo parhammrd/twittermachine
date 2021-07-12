@@ -1,6 +1,7 @@
 #!./venv/bin/python
 # -*- coding: utf-8 -*-
 import json
+import csv
 import twitter
 import logging
 
@@ -30,9 +31,9 @@ class clsuser(object):
 		self.uname = username
 		self._set_element()
 		# if not self.index:
-		#self._get_user_info()
-		# self._get_followers()
-		#self._get_friends()
+		self._get_user_info()
+		self._get_followers()
+		self._get_friends()
 
 	def _set_element(self):
 		session = DBC()
@@ -599,7 +600,7 @@ class uevent:
 		except ValueError:
 			point = False
 
-		if query.endswith(".json"):
+		if query.endswith(".csv"):
 			self.listinput(query)
 		elif query.endswith(".user"):
 			clsuser(None, query[:-5])
@@ -920,12 +921,19 @@ class uevent:
 		return
 
 	def listinput(self, filename):
-		us = open('./'+filename, 'r')
-		idlist = json.load(us)
-		us.close()
+		us = open('.'+filename, newline='\n')
+		idlist = csv.reader(us, delimiter = ',')
 
-		for i in idlist:
-			fus = clsuser(i)
+		for i, item in enumerate(idlist):
+
+			if (i < 110000):
+				continue
+			elif i > 150000:
+				break
+			fus = clsuser(int(item[0]))
+			print("counter: ", i)
+
+		us.close()
 
 		 #    fus.GetUserInfo()
 		    # fus._get_followers()
